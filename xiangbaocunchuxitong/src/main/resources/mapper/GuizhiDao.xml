@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.GuizhiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.guizhi_uuid_number as guizhiUuidNumber
+        ,a.guizhi_name as guizhiName
+        ,a.guizhi_photo as guizhiPhoto
+        ,a.guizhi_types as guizhiTypes
+        ,a.guizhi_address as guizhiAddress
+        ,a.guizhi_new_money as guizhiNewMoney
+        ,a.status_types as statusTypes
+        ,a.guizhi_content as guizhiContent
+        ,a.guizhi_delete as guizhiDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.GuizhiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM guizhi  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.guizhiUuidNumber != '' and params.guizhiUuidNumber != null and params.guizhiUuidNumber != 'null' ">
+                and a.guizhi_uuid_number like CONCAT('%',#{params.guizhiUuidNumber},'%')
+            </if>
+            <if test=" params.guizhiName != '' and params.guizhiName != null and params.guizhiName != 'null' ">
+                and a.guizhi_name like CONCAT('%',#{params.guizhiName},'%')
+            </if>
+            <if test="params.guizhiTypes != null and params.guizhiTypes != ''">
+                and a.guizhi_types = #{params.guizhiTypes}
+            </if>
+            <if test=" params.guizhiAddress != '' and params.guizhiAddress != null and params.guizhiAddress != 'null' ">
+                and a.guizhi_address like CONCAT('%',#{params.guizhiAddress},'%')
+            </if>
+            <if test="params.guizhiNewMoneyStart != null ">
+                <![CDATA[  and a.guizhi_new_money >= #{params.guizhiNewMoneyStart}   ]]>
+            </if>
+            <if test="params.guizhiNewMoneyEnd != null ">
+                <![CDATA[  and a.guizhi_new_money <= #{params.guizhiNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.statusTypes != null and params.statusTypes != ''">
+                and a.status_types = #{params.statusTypes}
+            </if>
+            <if test=" params.guizhiContent != '' and params.guizhiContent != null and params.guizhiContent != 'null' ">
+                and a.guizhi_content like CONCAT('%',#{params.guizhiContent},'%')
+            </if>
+            <if test="params.guizhiDeleteStart != null and params.guizhiDeleteStart != ''">
+                <![CDATA[  and a.guizhi_delete >= #{params.guizhiDeleteStart}   ]]>
+            </if>
+            <if test="params.guizhiDeleteEnd != null and params.guizhiDeleteEnd != ''">
+                <![CDATA[  and a.guizhi_delete <= #{params.guizhiDeleteEnd}   ]]>
+            </if>
+             <if test="params.guizhiDelete != null and params.guizhiDelete != ''">
+                and a.guizhi_delete = #{params.guizhiDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

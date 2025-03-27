@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.GuizhiYuyueDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.yonghu_id as yonghuId
+        ,a.guizhi_id as guizhiId
+        ,a.guizhi_yuyue_types as guizhiYuyueTypes
+        ,a.guizhi_yuyue_content as guizhiYuyueContent
+        ,a.guizhi_yuyue_time as guizhiYuyueTime
+        ,a.quchu_time as quchuTime
+        ,a.zhuangtai_types as zhuangtaiTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.GuizhiYuyueView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,guizhi.guizhi_uuid_number as guizhiUuidNumber
+        ,guizhi.guizhi_name as guizhiName
+        ,guizhi.guizhi_photo as guizhiPhoto
+        ,guizhi.guizhi_types as guizhiTypes
+        ,guizhi.guizhi_address as guizhiAddress
+        ,guizhi.guizhi_new_money as guizhiNewMoney
+        ,guizhi.status_types as statusTypes
+        ,guizhi.guizhi_content as guizhiContent
+        ,guizhi.guizhi_delete as guizhiDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.yonghu_delete as yonghuDelete
+
+        FROM guizhi_yuyue  a
+        left JOIN guizhi guizhi ON a.guizhi_id = guizhi.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.guizhiId != null and params.guizhiId != ''">
+                and (
+                    a.guizhi_id = #{params.guizhiId}
+                )
+            </if>
+            <if test="params.guizhiYuyueTypes != null and params.guizhiYuyueTypes != ''">
+                and a.guizhi_yuyue_types = #{params.guizhiYuyueTypes}
+            </if>
+            <if test=" params.guizhiYuyueContent != '' and params.guizhiYuyueContent != null and params.guizhiYuyueContent != 'null' ">
+                and a.guizhi_yuyue_content like CONCAT('%',#{params.guizhiYuyueContent},'%')
+            </if>
+            <if test=" params.guizhiYuyueTimeStart != '' and params.guizhiYuyueTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.guizhi_yuyue_time) >= UNIX_TIMESTAMP(#{params.guizhiYuyueTimeStart}) ]]>
+            </if>
+            <if test=" params.guizhiYuyueTimeEnd != '' and params.guizhiYuyueTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.guizhi_yuyue_time) <= UNIX_TIMESTAMP(#{params.guizhiYuyueTimeEnd}) ]]>
+            </if>
+            <if test=" params.quchuTimeStart != '' and params.quchuTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.quchu_time) >= UNIX_TIMESTAMP(#{params.quchuTimeStart}) ]]>
+            </if>
+            <if test=" params.quchuTimeEnd != '' and params.quchuTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.quchu_time) <= UNIX_TIMESTAMP(#{params.quchuTimeEnd}) ]]>
+            </if>
+            <if test="params.zhuangtaiTypes != null and params.zhuangtaiTypes != ''">
+                and a.zhuangtai_types = #{params.zhuangtaiTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断柜子信息的id不为空 -->
+            <if test=" params.guizhiIdNotNull != '' and params.guizhiIdNotNull != null and params.guizhiIdNotNull != 'null' ">
+                and a.guizhi_id IS NOT NULL
+            </if>
+            <if test=" params.guizhiUuidNumber != '' and params.guizhiUuidNumber != null and params.guizhiUuidNumber != 'null' ">
+                and guizhi.guizhi_uuid_number like CONCAT('%',#{params.guizhiUuidNumber},'%')
+            </if>
+            <if test=" params.guizhiName != '' and params.guizhiName != null and params.guizhiName != 'null' ">
+                and guizhi.guizhi_name like CONCAT('%',#{params.guizhiName},'%')
+            </if>
+            <if test="params.guizhiTypes != null  and params.guizhiTypes != ''">
+                and guizhi.guizhi_types = #{params.guizhiTypes}
+            </if>
+
+            <if test=" params.guizhiAddress != '' and params.guizhiAddress != null and params.guizhiAddress != 'null' ">
+                and guizhi.guizhi_address like CONCAT('%',#{params.guizhiAddress},'%')
+            </if>
+            <if test="params.guizhiNewMoneyStart != null ">
+                <![CDATA[  and guizhi.guizhi_new_money >= #{params.guizhiNewMoneyStart}   ]]>
+            </if>
+            <if test="params.guizhiNewMoneyEnd != null ">
+                <![CDATA[  and guizhi.guizhi_new_money <= #{params.guizhiNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.statusTypes != null  and params.statusTypes != ''">
+                and guizhi.status_types = #{params.statusTypes}
+            </if>
+
+            <if test=" params.guizhiContent != '' and params.guizhiContent != null and params.guizhiContent != 'null' ">
+                and guizhi.guizhi_content like CONCAT('%',#{params.guizhiContent},'%')
+            </if>
+            <if test="params.guizhiDeleteStart != null  and params.guizhiDeleteStart != '' ">
+                <![CDATA[  and guizhi.guizhi_delete >= #{params.guizhiDeleteStart}   ]]>
+            </if>
+            <if test="params.guizhiDeleteEnd != null  and params.guizhiDeleteEnd != '' ">
+                <![CDATA[  and guizhi.guizhi_delete <= #{params.guizhiDeleteEnd}   ]]>
+            </if>
+            <if test="params.guizhiDelete != null  and params.guizhiDelete != '' ">
+                and guizhi.guizhi_delete = #{params.guizhiDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(guizhi.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(guizhi.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.yonghuDeleteStart != null  and params.yonghuDeleteStart != '' ">
+                <![CDATA[  and yonghu.yonghu_delete >= #{params.yonghuDeleteStart}   ]]>
+            </if>
+            <if test="params.yonghuDeleteEnd != null  and params.yonghuDeleteEnd != '' ">
+                <![CDATA[  and yonghu.yonghu_delete <= #{params.yonghuDeleteEnd}   ]]>
+            </if>
+            <if test="params.yonghuDelete != null  and params.yonghuDelete != '' ">
+                and yonghu.yonghu_delete = #{params.yonghuDelete}
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
